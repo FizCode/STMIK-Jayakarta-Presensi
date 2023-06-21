@@ -1,4 +1,4 @@
-name: Presensi CI
+name: STMIK Jayakarta Presensi CI
 
 on:
   push:
