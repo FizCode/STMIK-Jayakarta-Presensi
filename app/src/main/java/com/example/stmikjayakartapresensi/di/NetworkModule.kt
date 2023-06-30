@@ -1,6 +1,8 @@
 package com.example.stmikjayakartapresensi.di
 
 import com.example.stmikjayakartapresensi.Constant
+import com.example.stmikjayakartapresensi.data.api.auth.AuthAPI
+import com.example.stmikjayakartapresensi.data.api.classes.ClassesAPI
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +20,7 @@ class NetworkModule {
     @Singleton
     @Provides
     @Named(Constant.Named.BASE_URL)
-    fun provideBaseUrl(): String = "http://localhost:3000/"
+    fun provideBaseUrl(): String = "https://www.mediq.website/"
 
     @Singleton
     @Provides
@@ -49,6 +51,22 @@ class NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideAuthAPI(
+        @Named(Constant.Named.RETROFIT) retrofit: Retrofit
+    ): AuthAPI {
+        return retrofit.create(AuthAPI::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideClassesAPI(
+        @Named(Constant.Named.RETROFIT) retrofit: Retrofit
+    ): ClassesAPI {
+        return retrofit.create(ClassesAPI::class.java)
     }
 
 }

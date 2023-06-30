@@ -3,7 +3,13 @@ buildscript {
         classpath 'com.google.dagger:hilt-android-gradle-plugin:2.43.2'
     }
     ext {
+        coroutines_version = '1.6.4'
+        hilt_version = '2.43.2'
+        icons_version = '1.4.3'
         lifecycle_version = '2.6.1'
+        okhttp_version = '5.0.0-alpha.6'
+        retrofit_version = '2.9.0'
+        room_version = '2.5.2'
     }
 }
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
