@@ -94,7 +94,7 @@ fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel 
                 )
             }
 
-            // Email Textfiel
+            // Email TextField
             EmailTextField(
                 value = emailValue,
                 onValueChanged = { emailValue = it },

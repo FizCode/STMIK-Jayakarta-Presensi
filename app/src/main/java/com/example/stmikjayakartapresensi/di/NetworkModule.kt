@@ -20,7 +20,7 @@ class NetworkModule {
     @Singleton
     @Provides
     @Named(Constant.Named.BASE_URL)
-    fun provideBaseUrl(): String = "https://www.mediq.website/"
+    fun provideBaseUrl(): String = "https://api.mediq.website/"
 
     @Singleton
     @Provides

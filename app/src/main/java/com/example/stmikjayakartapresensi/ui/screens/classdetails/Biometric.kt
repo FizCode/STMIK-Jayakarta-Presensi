@@ -9,26 +9,7 @@ import androidx.fragment.app.FragmentActivity
 import java.util.concurrent.Executor
 
 object Biometric {
-    fun statusName(context: Context): String {
-        val biometricManager = BiometricManager.from(context)
-        var result = 0
 
-        result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            biometricManager.canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_STRONG)
-        } else {
-            biometricManager.canAuthenticate()
-        }
-        return when (result) {
-            BiometricManager.BIOMETRIC_SUCCESS -> "BIOMETRIC_SUCCESS"
-            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> "BIOMETRIC_ERROR_NO_HARDWARE"
-            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> "BIOMETRIC_ERROR_HW_UNAVAILABLE"
-            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> "BIOMETRIC_ERROR_NONE_ENROLLED"
-            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> "BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED"
-            BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> "BIOMETRIC_ERROR_UNSUPPORTED"
-            BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> "BIOMETRIC_STATUS_UNKNOWN"
-            else -> {""}
-        }
-    }
 
     fun status(context: Context): Boolean {
         var result = false

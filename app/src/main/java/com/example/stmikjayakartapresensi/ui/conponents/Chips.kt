@@ -13,14 +13,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Chip() {
+fun Chip(classRoom: String) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp))
             .clip(shape = RoundedCornerShape(8.dp)),
     ) {
         Text(
-            text = "131",
+            text = classRoom,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSecondary
@@ -31,6 +31,6 @@ fun Chip() {
 @Preview(showBackground = true)
 @Composable
 fun ChipsPreview() {
-    Chip()
+    Chip("131")
 }
 

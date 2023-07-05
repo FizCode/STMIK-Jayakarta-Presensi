@@ -2,7 +2,7 @@ package com.example.stmikjayakartapresensi.ui.screens.home
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.stmikjayakartapresensi.data.api.classes.MyClassesResponse
+import com.example.stmikjayakartapresensi.data.api.classes.TodayClassesResponse
 import com.example.stmikjayakartapresensi.model.ProfileModel
 import com.example.stmikjayakartapresensi.repository.AuthRepository
 import com.example.stmikjayakartapresensi.repository.ClassesRepository
@@ -13,6 +13,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,13 +24,13 @@ class HomeViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val classesRepository: ClassesRepository
 ): ViewModel() {
-    val myClassesState = MutableStateFlow(MyClassesResponse())
+    val todayClassesState = MutableStateFlow(TodayClassesResponse())
     val shouldShowUser: MutableLiveData<ProfileModel> = MutableLiveData()
     val shouldShowError: MutableLiveData<String> = MutableLiveData()
 
     fun onViewLoaded() {
         getUserProfile()
-        // getMyClasses()
+        getMyClasses()
     }
 
 
@@ -45,14 +48,18 @@ class HomeViewModel @Inject constructor(
 
     private fun getMyClasses() {
         CoroutineScope(Dispatchers.IO).launch {
-            val token = authRepository.getToken().toString()
+            val token = "Bearer " + authRepository.getToken().toString()
             val studentsId = profileRepository.getProfile().id
-            val result = classesRepository.getMyClasses(token = token, studentsId = studentsId)
+
+            val formatter = DateTimeFormatter.ofPattern("EEEE", Locale("id"))
+            val currentDay: String = LocalDate.now().format(formatter)
+
+            val result = classesRepository.getTodayClass(token = token, studentsId = studentsId, day = currentDay)
             withContext(Dispatchers.Main) {
                 if (result.isSuccessful) {
-                    myClassesState.value = result.body()!!
+                    todayClassesState.value = result.body()!!
                 } else {
-                    shouldShowError.postValue(token)
+                    shouldShowError.postValue(result.message().orEmpty())
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.example.stmikjayakartapresensi.ui.conponents
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +18,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ClassesCard(subject: String) {
+fun ClassesCard(
+    day: String,
+    startClass:String,
+    endClass: String,
+    subject: String,
+    lecturer: String,
+    classRoom: String,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+        ,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Row(
@@ -33,7 +45,7 @@ fun ClassesCard(subject: String) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "08.30 - 10.30",
+                    text = "$day, $startClass - $endClass",
                     style = MaterialTheme.typography.labelMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -45,7 +57,7 @@ fun ClassesCard(subject: String) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "JOHAN HURSEPUNY. SH, MM",
+                    text = lecturer,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -53,7 +65,7 @@ fun ClassesCard(subject: String) {
             }
             Column(
             ) {
-                Chip()
+                Chip(classRoom)
             }
         }
     }
@@ -62,5 +74,13 @@ fun ClassesCard(subject: String) {
 @Preview(showBackground = true)
 @Composable
 fun CardsPreview() {
-    ClassesCard("Pendidikan Pancasila & Kewarganegaraan")
+    ClassesCard(
+        day = "Senin",
+        startClass = "08.30",
+        endClass = "10.30",
+        subject = "Pendidikan Pancasila & Kewarganegaraan",
+        lecturer = "Johan Hursepuny. SH, MM",
+        classRoom = "131",
+        onClick = {}
+    )
 }

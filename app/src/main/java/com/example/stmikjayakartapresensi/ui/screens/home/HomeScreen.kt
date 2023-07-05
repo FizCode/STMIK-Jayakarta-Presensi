@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.stmikjayakartapresensi.MainActivity
+import com.example.stmikjayakartapresensi.common.DatetimeFormat
 import com.example.stmikjayakartapresensi.ui.conponents.ClassesCard
 import com.example.stmikjayakartapresensi.ui.navigation.Screen
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -46,12 +47,12 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
     val context = LocalContext.current
 
     homeViewModel.onViewLoaded()
-    val classes = homeViewModel.myClassesState.collectAsState()
+    val classes = homeViewModel.todayClassesState.collectAsState()
     homeViewModel.shouldShowUser.observe(lifecycleOwner) {
         name = it.name
     }
     homeViewModel.shouldShowError.observe(lifecycleOwner) {
-        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
     }
 
     val systemUiController = rememberSystemUiController()
@@ -72,7 +73,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
             horizontalAlignment = Alignment.End
         ) {
             TextButton(
-                onClick = { navController.navigate(route = Screen.ClassDetails.route) },
+                onClick = { /* TODO: Logout */ },
             ) {
                 Text(text = "Halo, $name")
                 Spacer(modifier = Modifier.padding(4.dp))
@@ -89,15 +90,29 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
-        
-        ClassesCard(subject = "Hello!")
 
         // Cards
-        LazyColumn() {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
             itemsIndexed(
                 items = classes.value.data
             ) {index, item ->
-                ClassesCard(subject = item.classesId.toString())
+                val startClass = DatetimeFormat.timeFormatter(item.classDetails?.classStarted.toString()).toString()
+                val endClass = DatetimeFormat.timeFormatter(item.classDetails?.classEnded.toString()).toString()
+
+                ClassesCard(
+                    day = item.classDetails?.day.toString(),
+                    startClass = startClass,
+                    endClass = endClass,
+                    subject = item.classDetails?.className.toString(),
+                    lecturer = item.classDetails?.lecture?.name.toString(),
+                    classRoom = item.classDetails?.classRoom.toString(),
+                    onClick = {
+                        navController.navigate(route = Screen.ClassDetails.passId(item.classesId!!))
+                    }
+                )
             }
         }
 

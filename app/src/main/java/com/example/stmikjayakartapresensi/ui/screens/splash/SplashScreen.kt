@@ -14,7 +14,6 @@ fun SplashScreen(
     splashViewModel: SplashViewModel = hiltViewModel()
 ){
     splashViewModel.onViewLoaded()
-    // var isLoggedIn by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     var token  = "-"
 
@@ -28,5 +27,5 @@ fun SplashScreen(
         token = it
     }
 
-    Text(text = "Splash Screen. Token: $token") // delete after done making a logic
+    Text(text = "Splash Screen. Token: $token") // delete after done making a logo
 }
