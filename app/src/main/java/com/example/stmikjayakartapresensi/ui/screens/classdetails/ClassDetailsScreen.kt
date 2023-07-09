@@ -3,6 +3,7 @@ package com.example.stmikjayakartapresensi.ui.screens.classdetails
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,6 +64,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import java.time.LocalTime
 
 
 private var locationCallback: LocationCallback? = null
@@ -77,7 +79,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
     val lifecycleOwner = LocalLifecycleOwner.current
     val activity = LocalContext.current as FragmentActivity
     var currentLocation by remember { mutableStateOf(LocationModel(0.toDouble(), 0.toDouble())) }
-    var userId by remember { mutableStateOf("") }
+    var userId by remember { mutableStateOf(0) }
 
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(
@@ -87,13 +89,14 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
 
     classDetailsViewModel.onViewLoaded(classesId = argsId)
     val classesDetails = classDetailsViewModel.classDetailState.collectAsState()
+    val myPresenceStatus = classDetailsViewModel.myPresenceStatusState.collectAsState()
     classDetailsViewModel.shouldShowUser.observe(lifecycleOwner) {
-        userId = it.id.toString()
+        userId = it.id
+        classDetailsViewModel.getMyPresenceStatus(studentsId = it.id, classesId = argsId)
     }
     classDetailsViewModel.shouldShowError.observe(lifecycleOwner) {
-        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
     }
-
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionMap ->
@@ -101,12 +104,10 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         if (areGranted) {
             locationRequired = true
             startLocationUpdates()
-            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
     }
-    startLocationUpdates()
 
     // User Interface
     Scaffold(
@@ -174,16 +175,6 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         containerColor = Color.White,
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-
-                val onRange = isWithinRange(
-                    latitude = currentLocation.latitude,
-                    longitude = currentLocation.longitude
-                )
-                Text(text = if (onRange) "On Range ${currentLocation.latitude}, ${currentLocation.longitude}"
-                else "Not On Range ${currentLocation.latitude}, ${currentLocation.longitude}",
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                    )
-
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -208,7 +199,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                     LazyColumn() {
                         itemsIndexed(
                             items = classesDetails.value.data.classDetails
-                        ) { index, item ->
+                        ) { _, item ->
                             val presenceStatuses = item.student?.presenceStatus
                             Row(
                                 modifier = Modifier
@@ -246,6 +237,9 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         // Presence FAB
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
+
+            val myPresence = myPresenceStatus.value.presenceStatus
+
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(p0: LocationResult) {
@@ -256,80 +250,99 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                 }
             }
 
-            // FAB for presence
-            ExtendedFloatingActionButton(
-                onClick = {
-                val permissions = arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                // Check the GPS permissions
-                if (permissions.all {
-                        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-                    }) {
+            val startTimeString: String? = classesDetails.value.data.classStarted
+            val endTimeString: String? = classesDetails.value.data.classEnded
 
-                    // Start Authentication process
-                    val availabilityCheck = Biometric.status(context)
-                    if (availabilityCheck) {
-                        Biometric.authenticate(
-                            activity = activity,
-                            context = context,
-                            title = "Biometric Authentication",
-                            subtitle = "Authenticate to process",
-                            description = "Untuk dapat presensi, silakan pakai autentikasi",
-                            negativeText = "Batal",
-                            onSuccess = {
-                                val onRange = isWithinRange(
-                                    latitude = currentLocation.latitude,
-                                    longitude = currentLocation.longitude
-                                )
+            fun isCurrentTimeInRange(): Boolean {
+                if (startTimeString == null || endTimeString == null) {
+                    return false
+                }
 
-                                /* TODO: Change this Toast to be ViewModel process! */
+                val startTime = LocalTime.parse(startTimeString)
+                val endTime = LocalTime.parse(endTimeString)
+                val currentTime = LocalTime.now()
 
-                                if (onRange) {
-                                    classDetailsViewModel.postStudentPresence(studentsId = userId.toInt(), classesId = argsId)
-                                } else {
+                return currentTime.isAfter(startTime) && currentTime.isBefore(endTime)
+            }
+
+            if (myPresence.isEmpty() && isCurrentTimeInRange()) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        val permissions = arrayOf(
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        )
+
+                        // Check the GPS permissions
+                        if (permissions.all {
+                                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                            }) {
+                            startLocationUpdates() // update the user location before auth.
+
+                            // Start Authentication process
+                            val availabilityCheck = Biometric.status(context)
+                            if (availabilityCheck) {
+                                Biometric.authenticate(
+                                    activity = activity,
+                                    context = context,
+                                    title = "Biometric Authentication",
+                                    subtitle = "Authenticate to process",
+                                    description = "Untuk dapat presensi, silakan pakai autentikasi",
+                                    negativeText = "Batal",
+                                    onSuccess = {
+                                        val onRadius = isWithinRadius(
+                                            currentLatitude = currentLocation.latitude,
+                                            currentLongitude = currentLocation.longitude
+                                        )
+
+                                        if (onRadius) {
+                                            classDetailsViewModel.postStudentPresence(studentsId = userId, classesId = argsId)
+                                            Toast.makeText(context, "Berhasil Presensi!", Toast.LENGTH_SHORT).show()
+                                            classDetailsViewModel.onViewLoaded(argsId)
+                                        } else {
+                                            Toast.makeText(
+                                                context, "Pastikan kamu berada dalam kelas dan GPS menyala.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    },
+                                    onError = { errorCode, errorString->
+                                        Toast.makeText(
+                                            context,
+                                            "$errorCode: $errorString",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                ) {
                                     Toast.makeText(
-                                        context, "Pastikan kamu menyalakan GPS dan sedang berada di kelas.",
+                                        context,
+                                        "Authentication gagal. Pastikan sidik jarimu bersih",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
-                            },
-                            onError = { errorCode, errorString->
-                                Toast.makeText(
-                                    context,
-                                    "$errorCode: $errorString",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                            } else {
+                                Toast.makeText(context, "Auth Tidak tersedia", Toast.LENGTH_SHORT).show()
                             }
-                        ) {
-                            Toast.makeText(
-                                context,
-                                "Authentication gagal. Pastikan sidik jarimu bersih",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    } else {
-                        Toast.makeText(context, "Auth Tidak tersedia", Toast.LENGTH_SHORT).show()
-                    }
 
-                } else {
-                    launcherMultiplePermissions.launch(permissions)
-                }
-            },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Fingerprint,
-                        contentDescription = "Presence Button"
-                    )
-                },
-                text = {
-                    Text(
-                        text = ("Hadir"),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            )
+                        } else {
+                            launcherMultiplePermissions.launch(permissions)
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Fingerprint,
+                            contentDescription = "Presence Button"
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = ("Hadir"),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                )
+            }
+
         }
     )
 
@@ -376,13 +389,20 @@ private fun startLocationUpdates() {
 }
 
 // Logic for range Latitude & Longitude Jayakarta
-fun isWithinRange(latitude: Double, longitude: Double): Boolean {
-    val minLatitude = -6.198900 //36.4219800
-    val maxLatitude = -6.198400 //38.4219983
-    val minLongitude = 106.850500 //-123.084
-    val maxLongitude = 106.850700 //-121.084
+fun isWithinRadius(currentLatitude: Double, currentLongitude: Double): Boolean {
+    val targetLocation = Location("").apply {
+        latitude = -6.198570
+        longitude = 106.850700
+    }
 
-    return latitude in minLatitude..maxLatitude && longitude in minLongitude..maxLongitude
+    val currentLocation = Location("").apply {
+        latitude = currentLatitude
+        longitude = currentLongitude
+    }
+
+    val distanceInMeters = currentLocation.distanceTo(targetLocation)
+
+    return distanceInMeters <= 100 // Radius in Meters
 }
 
 @Preview(showBackground = true)

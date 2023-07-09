@@ -28,4 +28,10 @@ interface ClassesAPI {
         @Header("Authorization") token: String,
         @Path("id") classes_id: Int
     ): Response<ClassesDetailsResponse>
+    @GET("/api/students/{id}/presenceStatus")
+    suspend fun getMyPresenceStatus(
+        @Header("Authorization") token: String,
+        @Path("id") students_id: Int,
+        @Query("classes_id") classes_id: Int
+    ): Response<MyPresenceStatusResponse>
 }

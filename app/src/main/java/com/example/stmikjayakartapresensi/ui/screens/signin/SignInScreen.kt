@@ -3,6 +3,7 @@ package com.example.stmikjayakartapresensi.ui.screens.signin
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -38,12 +39,15 @@ import kotlin.system.exitProcess
 
 @Composable
 fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel = hiltViewModel()) {
-    val logo = painterResource(R.drawable.stmikjayakarta_logo)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+
+    val isDarkTheme = isSystemInDarkTheme()
+    val logo = if (isDarkTheme) R.drawable.stmikjayakarta_dark else R.drawable.stmikjayakarta_light
+
     var emailValue by remember { mutableStateOf("") }
     var passwordValue by remember { mutableStateOf("") }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
 
     signInViewModel.onChangeEmail(emailValue)
     signInViewModel.onChangePassword(passwordValue)
@@ -76,7 +80,7 @@ fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel 
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = logo,
+                    painter = painterResource(id = logo),
                     contentDescription = "STMIK Jayakarta Logo",
                     modifier = Modifier
                         .size(188.dp)

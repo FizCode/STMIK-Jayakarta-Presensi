@@ -73,7 +73,10 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
             horizontalAlignment = Alignment.End
         ) {
             TextButton(
-                onClick = { /* TODO: Logout */ },
+                onClick = {
+                    /* TODO: Logout */
+                    navController.navigate(route = Screen.ClassDetails.passId(7))
+                },
             ) {
                 Text(text = "Halo, $name")
                 Spacer(modifier = Modifier.padding(4.dp))
@@ -95,10 +98,10 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
+            val dataSortedByTime = classes.value.data.sortedBy { it.classDetails?.classStarted }
             itemsIndexed(
-                items = classes.value.data
-            ) {index, item ->
+                items = dataSortedByTime
+            ) {_, item ->
                 val startClass = DatetimeFormat.timeFormatter(item.classDetails?.classStarted.toString()).toString()
                 val endClass = DatetimeFormat.timeFormatter(item.classDetails?.classEnded.toString()).toString()
 

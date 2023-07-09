@@ -16,7 +16,6 @@ private val authRepository: AuthRepository
 ): ViewModel() {
     val shouldOpenSignIn: MutableLiveData<Boolean> = MutableLiveData()
     val shouldOpenHome: MutableLiveData<Boolean> = MutableLiveData()
-    var userToken: MutableLiveData<String> = MutableLiveData()
 
     fun onViewLoaded() {
         getUserToken()
