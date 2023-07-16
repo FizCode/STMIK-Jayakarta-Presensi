@@ -1,5 +1,7 @@
 package com.example.stmikjayakartapresensi.ui.screens.classdetails
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.stmikjayakartapresensi.data.api.classes.ClassesDetailsResponse
@@ -24,11 +26,12 @@ class ClassDetailsViewModel @Inject constructor(
     private val profileRepository: ProfileRepository
 ): ViewModel() {
 
+    private val presenceStatusState = MutableStateFlow(StudentPresenceResponse())
     val shouldShowUser: MutableLiveData<ProfileModel> = MutableLiveData()
     val classDetailState = MutableStateFlow(ClassesDetailsResponse())
-    val presenceStatusState = MutableStateFlow(StudentPresenceResponse())
     val myPresenceStatusState = MutableStateFlow(MyPresenceStatusResponse())
-    val shouldShowError: MutableLiveData<String> = MutableLiveData()
+    val shouldShowError: MutableState<Boolean> = mutableStateOf(false)
+    val errorMessage: MutableState<String> = mutableStateOf("")
 
     fun onViewLoaded(classesId: Int) {
         getUserProfile()
@@ -43,7 +46,8 @@ class ClassDetailsViewModel @Inject constructor(
                 if (result.isSuccessful) {
                     presenceStatusState.value = result.body()!!
                 } else {
-                    shouldShowError.postValue(result.message().toString())
+                    shouldShowError.value = true
+                    errorMessage.value = result.message().orEmpty()
                 }
             }
         }
@@ -54,7 +58,7 @@ class ClassDetailsViewModel @Inject constructor(
             val profile = profileRepository.getProfile()
             withContext(Dispatchers.Main) {
                 profile.let {
-                    shouldShowUser.postValue(it)
+                    shouldShowUser.value = it
                 }
             }
         }
@@ -67,7 +71,8 @@ class ClassDetailsViewModel @Inject constructor(
                 if (result.isSuccessful) {
                     classDetailState.value = result.body()!!
                 } else {
-                    shouldShowError.postValue(result.message().toString())
+                    shouldShowError.value = true
+                    errorMessage.value = result.message().orEmpty()
                 }
             }
 
@@ -82,7 +87,8 @@ class ClassDetailsViewModel @Inject constructor(
                 if (result.isSuccessful) {
                     myPresenceStatusState.value = result.body()!!
                 } else {
-                    shouldShowError.postValue(result.message().toString())
+                    shouldShowError.value = true
+                    errorMessage.value = result.message().orEmpty()
                 }
             }
         }

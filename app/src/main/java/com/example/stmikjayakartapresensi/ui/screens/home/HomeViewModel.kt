@@ -1,5 +1,7 @@
 package com.example.stmikjayakartapresensi.ui.screens.home
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.stmikjayakartapresensi.data.api.classes.TodayClassesResponse
@@ -24,9 +26,11 @@ class HomeViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val classesRepository: ClassesRepository
 ): ViewModel() {
+
     val todayClassesState = MutableStateFlow(TodayClassesResponse())
     val shouldShowUser: MutableLiveData<ProfileModel> = MutableLiveData()
-    val shouldShowError: MutableLiveData<String> = MutableLiveData()
+    val shouldShowError: MutableState<Boolean> = mutableStateOf(false)
+    val errorMessage: MutableState<String> = mutableStateOf("")
 
     fun onViewLoaded() {
         getUserProfile()
@@ -59,7 +63,8 @@ class HomeViewModel @Inject constructor(
                 if (result.isSuccessful) {
                     todayClassesState.value = result.body()!!
                 } else {
-                    shouldShowError.postValue(result.message().orEmpty())
+                    shouldShowError.value = true
+                    errorMessage.value = result.message().orEmpty()
                 }
             }
         }

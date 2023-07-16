@@ -48,12 +48,14 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
 
     homeViewModel.onViewLoaded()
     val classes = homeViewModel.todayClassesState.collectAsState()
+    val showError = homeViewModel.shouldShowError.value
+    val errorMessage = homeViewModel.errorMessage.value
     homeViewModel.shouldShowUser.observe(lifecycleOwner) {
         name = it.name
     }
-    homeViewModel.shouldShowError.observe(lifecycleOwner) {
-        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-    }
+
+    // error handler
+    if (showError) Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
 
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(

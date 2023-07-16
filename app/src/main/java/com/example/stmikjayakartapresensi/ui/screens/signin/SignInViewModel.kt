@@ -1,6 +1,8 @@
 package com.example.stmikjayakartapresensi.ui.screens.signin
 
 import android.util.Patterns
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,9 +26,10 @@ class SignInViewModel @Inject constructor(
     private var email: String = ""
     private var password: String = ""
 
-    val shouldShowError: MutableLiveData<String> = MutableLiveData()
+    val shouldShowLoading: MutableState<Boolean> = mutableStateOf(false)
+    val shouldShowError: MutableState<Boolean> = mutableStateOf(false)
+    val errorMessage: MutableState<String> = mutableStateOf("")
     val shouldOpenHomePage: MutableLiveData<Boolean> = MutableLiveData()
-    // val shouldShowLoading: MutableLiveData<Boolean> = MutableLiveData()
 
     fun onChangeEmail(email: String) {
         this.email = email
@@ -38,16 +41,18 @@ class SignInViewModel @Inject constructor(
 
     fun onClickSignIn() {
         if (email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            shouldShowError.postValue("Email tidak valid")
+            shouldShowError.value = true
+            errorMessage.value = "Email Tidak Valid"
         } else if (password.isNotEmpty() && password.length < 1) {
-            shouldShowError.postValue("Password tidak valid")
+            shouldShowError.value = true
+            errorMessage.value = "Password tidak valid"
         } else {
-            // shouldShowError.postValue("email: ${email}, password: ${password}")
-            signInFromAPI() // error local network
+            signInFromAPI()
         }
     }
 
     private fun signInFromAPI() {
+        shouldShowLoading.value = true
         CoroutineScope(Dispatchers.IO).launch {
             val request = SignInRequest(
                 email = email,
@@ -62,8 +67,12 @@ class SignInViewModel @Inject constructor(
                         insertToken(token = token)
                         getUserData(token = token)
                     }
+                } else {
+                    shouldShowError.value = true
+                    errorMessage.value = response.message().orEmpty()
                 }
             }
+            shouldShowLoading.value = false
         }
     }
 
@@ -93,7 +102,8 @@ class SignInViewModel @Inject constructor(
                 } else {
                     val error =
                         Gson().fromJson(response.errorBody()?.string(), ErrorResponse::class.java)
-                    shouldShowError.postValue(error.message.orEmpty() + " #${error.code}")
+                    shouldShowError.value = true
+                    errorMessage.value = error.message.orEmpty() + " #${error.code}"
                 }
             }
         }
@@ -106,7 +116,8 @@ class SignInViewModel @Inject constructor(
                 if (result != 0L) {
                     shouldOpenHomePage.postValue(true)
                 } else {
-                    shouldShowError.postValue("Maaf, gagal inset ke dalam ROOM. Harap lapor ke pengembang aplikasi!")
+                    shouldShowError.value = true
+                    errorMessage.value = "Maaf, gagal inset ke dalam ROOM. Harap lapor ke pengembang aplikasi!"
                 }
             }
         }

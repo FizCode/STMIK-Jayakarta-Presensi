@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,24 +40,6 @@ import kotlin.system.exitProcess
 
 @Composable
 fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel = hiltViewModel()) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-
-    val isDarkTheme = isSystemInDarkTheme()
-    val logo = if (isDarkTheme) R.drawable.stmikjayakarta_dark else R.drawable.stmikjayakarta_light
-
-    var emailValue by remember { mutableStateOf("") }
-    var passwordValue by remember { mutableStateOf("") }
-
-
-    signInViewModel.onChangeEmail(emailValue)
-    signInViewModel.onChangePassword(passwordValue)
-    signInViewModel.shouldOpenHomePage.observe(lifecycleOwner) {
-        navController.navigate(route = HOME_ROUTE)
-    }
-    signInViewModel.shouldShowError.observe(lifecycleOwner){
-        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-    }
 
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(
@@ -64,6 +47,29 @@ fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel 
         darkIcons = true
     )
 
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val isDarkTheme = isSystemInDarkTheme()
+    val logo = if (isDarkTheme) R.drawable.stmikjayakarta_dark else R.drawable.stmikjayakarta_light
+
+    var emailValue by remember { mutableStateOf("") }
+    var passwordValue by remember { mutableStateOf("") }
+
+
+    // BindViewModels
+    signInViewModel.onChangeEmail(emailValue)
+    signInViewModel.onChangePassword(passwordValue)
+
+    val loading = signInViewModel.shouldShowLoading.value
+    val showError = signInViewModel.shouldShowError.value
+    val errorMessage = signInViewModel.errorMessage.value
+
+    // Sign in handler
+    signInViewModel.shouldOpenHomePage.observe(lifecycleOwner) {
+        navController.navigate(route = HOME_ROUTE)
+    }
+
+    // View
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,6 +79,10 @@ fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel 
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            // Loading & error handler
+            if (loading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            if (showError) Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
 
             // Jayakarta Icon
             Column(

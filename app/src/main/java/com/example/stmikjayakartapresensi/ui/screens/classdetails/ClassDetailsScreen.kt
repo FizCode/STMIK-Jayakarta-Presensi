@@ -90,13 +90,17 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
     classDetailsViewModel.onViewLoaded(classesId = argsId)
     val classesDetails = classDetailsViewModel.classDetailState.collectAsState()
     val myPresenceStatus = classDetailsViewModel.myPresenceStatusState.collectAsState()
+    val showError = classDetailsViewModel.shouldShowError.value
+    val errorMessage = classDetailsViewModel.errorMessage.value
     classDetailsViewModel.shouldShowUser.observe(lifecycleOwner) {
         userId = it.id
         classDetailsViewModel.getMyPresenceStatus(studentsId = it.id, classesId = argsId)
     }
-    classDetailsViewModel.shouldShowError.observe(lifecycleOwner) {
-        Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
-    }
+
+    // Loading & Error handler
+    if (showError) Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+
+    // Multiple Permission GPS request
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionMap ->
