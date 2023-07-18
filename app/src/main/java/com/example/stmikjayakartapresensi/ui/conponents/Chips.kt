@@ -16,14 +16,14 @@ import androidx.compose.ui.unit.dp
 fun Chip(classRoom: String) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.tertiary, shape = RoundedCornerShape(8.dp))
             .clip(shape = RoundedCornerShape(8.dp)),
     ) {
         Text(
             text = classRoom,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSecondary
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onTertiary
         )
     }
 }

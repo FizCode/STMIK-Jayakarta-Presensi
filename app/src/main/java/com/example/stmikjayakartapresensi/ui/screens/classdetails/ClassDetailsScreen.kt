@@ -2,9 +2,11 @@ package com.example.stmikjayakartapresensi.ui.screens.classdetails
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,10 +21,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.HourglassBottom
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.HourglassBottom
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
@@ -31,7 +34,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,7 +61,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.stmikjayakartapresensi.common.DatetimeFormat
 import com.example.stmikjayakartapresensi.model.LocationModel
 import com.example.stmikjayakartapresensi.ui.conponents.Chip
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.example.stmikjayakartapresensi.ui.conponents.StatusAndNavBarColorPrimaryContainer
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -80,12 +84,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
     val activity = LocalContext.current as FragmentActivity
     var currentLocation by remember { mutableStateOf(LocationModel(0.toDouble(), 0.toDouble())) }
     var userId by remember { mutableStateOf(0) }
-
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(
-        MaterialTheme.colorScheme.background,
-        darkIcons = true
-    )
+    val openDialog= remember { mutableStateOf(false) }
 
     classDetailsViewModel.onViewLoaded(classesId = argsId)
     val classesDetails = classDetailsViewModel.classDetailState.collectAsState()
@@ -114,34 +113,47 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
     }
 
     // User Interface
+    StatusAndNavBarColorPrimaryContainer()
     Scaffold(
-        modifier = Modifier.background(color = Color.White),
-
         // Top App Bar
         topBar = {
             Column(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.background,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
                     )
                     .clip(shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             ) {
                 TopAppBar(
+                    colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     title = { Text(text = "")},
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back to Home")
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                contentDescription = "Back to Home"
+                            )
                         }
                     },
                     actions = {
-                        IconButton(onClick = { }) {
-                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More Option")
+                        IconButton(onClick = {
+                            classDetailsViewModel.onViewLoaded(classesId = argsId)
+                            Toast.makeText(context, "Data Diperbarui", Toast.LENGTH_SHORT).show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                contentDescription = "More Option"
+                            )
                         }
                     }
                 )
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(color = MaterialTheme.colorScheme.primaryContainer),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
@@ -156,34 +168,33 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                         Text(
                             text = className,
                             style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
                             text = "$day, $classStarted - $classEnded",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
                             text = lecturer,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Chip(classRoom = classRoom)
                     }
-
                 }
             }
         },
 
         // Contents
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(color = MaterialTheme.colorScheme.background)
+                    .background(color = MaterialTheme.colorScheme.primaryContainer)
                 ) {
 
                     Column(
@@ -200,41 +211,72 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                         )
                     }
 
-                    LazyColumn() {
+                    LazyColumn {
+                        val itemSortedByName = classesDetails.value.data.classDetails.sortedBy { it.student?.name }
                         itemsIndexed(
-                            items = classesDetails.value.data.classDetails
+                            items = itemSortedByName
                         ) { _, item ->
-                            val presenceStatuses = item.student?.presenceStatus
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp, horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            val presence = item.student?.presenceStatus
+                            Column(
+                                modifier = Modifier.background(
+                                    color = if (item.studentsId == userId) {
+                                        MaterialTheme.colorScheme.inversePrimary
+                                    }
+                                    else { MaterialTheme.colorScheme.primaryContainer }
+                                )
                             ) {
-                                item.student?.name?.let {
-                                    Text(
-                                        text = it,
-                                        modifier = Modifier.weight(1f),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                                if (presenceStatuses!!.isNotEmpty()) {
-                                    Icon(
-                                        imageVector = Icons.Default.CheckCircle,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        contentDescription = "Presence Status",
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.HourglassBottom,
-                                        tint = MaterialTheme.colorScheme.outline,
-                                        contentDescription = "Presence Status",
-                                    )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp, horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    item.student?.name?.let {
+                                        Text(
+                                            text = it,
+                                            modifier = Modifier.weight(1f),
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                    if (presence!!.isNotEmpty()) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.CheckCircle,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            contentDescription = "Presence Status",
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Rounded.HourglassBottom,
+                                            tint = MaterialTheme.colorScheme.outline,
+                                            contentDescription = "Presence Status",
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            if (openDialog.value) {
+                AlertDialog(
+                    onDismissRequest = { openDialog.value = false },
+                    title = { Text(text = "Tidak Dalam Radius") },
+                    text = { Text(text = "Kamu tidak dalam radius Jayakarta. Pastikan kamu berada dalam kelas dan GPS menyala lalu lakukan  presensi kembali.")},
+                    confirmButton = {
+                        TextButton(onClick = {
+                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "NYALAKAN GPS")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { openDialog.value = false }) {
+                            Text(text = "KEMBALI")
+                        }
+                    },
+                )
             }
         },
 
@@ -304,10 +346,11 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                                             Toast.makeText(context, "Berhasil Presensi!", Toast.LENGTH_SHORT).show()
                                             classDetailsViewModel.onViewLoaded(argsId)
                                         } else {
-                                            Toast.makeText(
-                                                context, "Pastikan kamu berada dalam kelas dan GPS menyala.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            openDialog.value = true
+//                                            Toast.makeText(
+//                                                context, "Pastikan kamu berada dalam kelas dan GPS menyala.",
+//                                                Toast.LENGTH_SHORT
+//                                            ).show()
                                         }
                                     },
                                     onError = { errorCode, errorString->

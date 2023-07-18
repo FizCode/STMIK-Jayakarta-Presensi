@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.stmikjayakartapresensi.R
+import com.example.stmikjayakartapresensi.ui.conponents.StatusAndNavBarColorBackground
 import com.example.stmikjayakartapresensi.ui.navigation.AUTHENTICATION_ROUTE
 import com.example.stmikjayakartapresensi.ui.navigation.HOME_ROUTE
 
@@ -45,7 +46,8 @@ fun SplashScreen(
     val screenWith = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
-
+    // User Interface
+    StatusAndNavBarColorBackground()
     Scaffold(
         content =  { innerPadding ->
             Column(

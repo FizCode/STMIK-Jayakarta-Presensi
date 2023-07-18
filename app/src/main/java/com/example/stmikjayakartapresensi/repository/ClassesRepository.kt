@@ -1,8 +1,8 @@
 package com.example.stmikjayakartapresensi.repository
 
-import com.example.stmikjayakartapresensi.data.api.classes.ClassesDetailsResponse
 import com.example.stmikjayakartapresensi.data.api.classes.ClassesAPI
-import com.example.stmikjayakartapresensi.data.api.classes.MyPresenceStatusResponse
+import com.example.stmikjayakartapresensi.data.api.classes.ClassesDetailsResponse
+import com.example.stmikjayakartapresensi.data.api.classes.PresenceStatusResponse
 import com.example.stmikjayakartapresensi.data.api.classes.StudentPresenceResponse
 import com.example.stmikjayakartapresensi.data.api.classes.TodayClassesResponse
 import retrofit2.Response
@@ -22,7 +22,7 @@ class ClassesRepository @Inject constructor(
         return api.getClassDetails(token = token, classes_id = classes_id)
     }
 
-    suspend fun getMyPresence(token: String, studentsId: Int, classesId: Int): Response<MyPresenceStatusResponse> {
+    suspend fun getMyPresence(token: String, studentsId: Int, classesId: Int): Response<PresenceStatusResponse> {
         return api.getMyPresenceStatus(token = token, classes_id = classesId, students_id = studentsId)
     }
 }

@@ -3,7 +3,7 @@ package com.example.stmikjayakartapresensi.data.api.classes
 import com.google.gson.annotations.SerializedName
 
 data class ClassesDetailsResponse(
-    @SerializedName("staus" ) var status : String? = null,
+    @SerializedName("status" ) var status : String? = null,
     @SerializedName("data"  ) var data  : Data     = Data()
 
 ) {
@@ -39,6 +39,7 @@ data class ClassesDetailsResponse(
 
         @SerializedName("name"            ) var name           : String?           = null,
         @SerializedName("presence_status" ) var presenceStatus : ArrayList<PresenceStatus> = arrayListOf()
+
 
     )
 

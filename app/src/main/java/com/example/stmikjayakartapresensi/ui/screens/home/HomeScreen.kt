@@ -34,8 +34,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.stmikjayakartapresensi.MainActivity
 import com.example.stmikjayakartapresensi.common.DatetimeFormat
 import com.example.stmikjayakartapresensi.ui.conponents.ClassesCard
+import com.example.stmikjayakartapresensi.ui.conponents.StatusAndNavBarColorBackground
 import com.example.stmikjayakartapresensi.ui.navigation.Screen
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlin.system.exitProcess
 
 @Composable
@@ -45,6 +45,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+
 
     homeViewModel.onViewLoaded()
     val classes = homeViewModel.todayClassesState.collectAsState()
@@ -57,12 +58,8 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
     // error handler
     if (showError) Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
 
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(
-        MaterialTheme.colorScheme.background,
-        darkIcons = true
-    )
-
+    // User Interface
+    StatusAndNavBarColorBackground()
     Column(
         modifier = Modifier
             .fillMaxSize()

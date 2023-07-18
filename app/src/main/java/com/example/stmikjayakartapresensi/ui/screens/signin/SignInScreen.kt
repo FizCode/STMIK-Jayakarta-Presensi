@@ -34,23 +34,19 @@ import com.example.stmikjayakartapresensi.MainActivity
 import com.example.stmikjayakartapresensi.R
 import com.example.stmikjayakartapresensi.ui.conponents.EmailTextField
 import com.example.stmikjayakartapresensi.ui.conponents.PasswordTextField
+import com.example.stmikjayakartapresensi.ui.conponents.StatusAndNavBarColorBackground
 import com.example.stmikjayakartapresensi.ui.navigation.HOME_ROUTE
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlin.system.exitProcess
 
 @Composable
 fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel = hiltViewModel()) {
 
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(
-        MaterialTheme.colorScheme.background,
-        darkIcons = true
-    )
-
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
     val isDarkTheme = isSystemInDarkTheme()
     val logo = if (isDarkTheme) R.drawable.stmikjayakarta_dark else R.drawable.stmikjayakarta_light
+
 
     var emailValue by remember { mutableStateOf("") }
     var passwordValue by remember { mutableStateOf("") }
@@ -69,7 +65,8 @@ fun SignInScreen(navController: NavController, signInViewModel: SignInViewModel 
         navController.navigate(route = HOME_ROUTE)
     }
 
-    // View
+    // User Interface
+    StatusAndNavBarColorBackground()
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -38,7 +38,8 @@ fun EmailTextField(
         leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "emailIcon")},
         label = { Text(text = label)},
         placeholder = { Text(text = placeholder)},
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        singleLine = true
     )
 }
 
@@ -70,7 +71,8 @@ fun PasswordTextField(
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
         label = { Text(text = label)},
         placeholder = { Text(text = placeholder)},
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        singleLine = true
     )
 }
 

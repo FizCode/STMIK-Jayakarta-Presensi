@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.stmikjayakartapresensi.data.api.classes.ClassesDetailsResponse
-import com.example.stmikjayakartapresensi.data.api.classes.MyPresenceStatusResponse
+import com.example.stmikjayakartapresensi.data.api.classes.PresenceStatusResponse
 import com.example.stmikjayakartapresensi.data.api.classes.StudentPresenceResponse
 import com.example.stmikjayakartapresensi.model.ProfileModel
 import com.example.stmikjayakartapresensi.repository.AuthRepository
@@ -29,7 +29,7 @@ class ClassDetailsViewModel @Inject constructor(
     private val presenceStatusState = MutableStateFlow(StudentPresenceResponse())
     val shouldShowUser: MutableLiveData<ProfileModel> = MutableLiveData()
     val classDetailState = MutableStateFlow(ClassesDetailsResponse())
-    val myPresenceStatusState = MutableStateFlow(MyPresenceStatusResponse())
+    val myPresenceStatusState = MutableStateFlow(PresenceStatusResponse())
     val shouldShowError: MutableState<Boolean> = mutableStateOf(false)
     val errorMessage: MutableState<String> = mutableStateOf("")
 
