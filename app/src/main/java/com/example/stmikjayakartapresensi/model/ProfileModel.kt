@@ -5,4 +5,5 @@ data class ProfileModel(
     val name: String,
     val nim: String,
     val email: String,
+    val major: String,
 )

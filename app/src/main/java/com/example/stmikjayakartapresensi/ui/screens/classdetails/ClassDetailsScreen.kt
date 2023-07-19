@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.CountDownTimer
 import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
@@ -31,6 +32,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -82,10 +84,14 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val activity = LocalContext.current as FragmentActivity
+
+    // Remember states
     var currentLocation by remember { mutableStateOf(LocationModel(0.toDouble(), 0.toDouble())) }
     var userId by remember { mutableStateOf(0) }
     val openDialog= remember { mutableStateOf(false) }
+    val loading= remember { mutableStateOf(false) }
 
+    // BindViewModel
     classDetailsViewModel.onViewLoaded(classesId = argsId)
     val classesDetails = classDetailsViewModel.classDetailState.collectAsState()
     val myPresenceStatus = classDetailsViewModel.myPresenceStatusState.collectAsState()
@@ -107,6 +113,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         if (areGranted) {
             locationRequired = true
             startLocationUpdates()
+            Toast.makeText(context, "Silakan lakukan presensi kembali", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -197,6 +204,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                     .background(color = MaterialTheme.colorScheme.primaryContainer)
                 ) {
 
+                    // Table Head
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -211,6 +219,10 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                         )
                     }
 
+                    // loading
+                    if (loading.value) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+                    // Table Body
                     LazyColumn {
                         val itemSortedByName = classesDetails.value.data.classDetails.sortedBy { it.student?.name }
                         itemsIndexed(
@@ -258,6 +270,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                 }
             }
 
+            // Dialog
             if (openDialog.value) {
                 AlertDialog(
                     onDismissRequest = { openDialog.value = false },
@@ -342,15 +355,19 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                                         )
 
                                         if (onRadius) {
+                                            loading.value = true
                                             classDetailsViewModel.postStudentPresence(studentsId = userId, classesId = argsId)
                                             Toast.makeText(context, "Berhasil Presensi!", Toast.LENGTH_SHORT).show()
-                                            classDetailsViewModel.onViewLoaded(argsId)
+                                            val timer = object : CountDownTimer(2000, 1000) {
+                                                override fun onTick(millisUntilFinished: Long){}
+                                                override fun onFinish() {
+                                                    classDetailsViewModel.onViewLoaded(classesId = argsId)
+                                                    loading.value = false
+                                                }
+                                            }
+                                            timer.start()
                                         } else {
                                             openDialog.value = true
-//                                            Toast.makeText(
-//                                                context, "Pastikan kamu berada dalam kelas dan GPS menyala.",
-//                                                Toast.LENGTH_SHORT
-//                                            ).show()
                                         }
                                     },
                                     onError = { errorCode, errorString->

@@ -13,7 +13,8 @@ class ProfileRepository @Inject constructor(
                 id = it?.id.hashCode(),
                 name = it?.name.orEmpty(),
                 email = it?.email.orEmpty(),
-                nim = it?.nim.orEmpty()
+                nim = it?.nim.orEmpty(),
+                major = it?.major.orEmpty()
             )
         }
     }

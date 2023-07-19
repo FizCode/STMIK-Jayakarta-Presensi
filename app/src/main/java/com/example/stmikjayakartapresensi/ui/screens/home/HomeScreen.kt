@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,18 +43,26 @@ import kotlin.system.exitProcess
 @Composable
 fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hiltViewModel()) {
 
-    var name by remember { mutableStateOf("") }
-
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
+    // Remember State
+    val openDialog= remember { mutableStateOf(false) }
+    var email by remember { mutableStateOf("") }
+    var nim by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var major by remember { mutableStateOf("") }
 
+    // Bind ViewModel
     homeViewModel.onViewLoaded()
     val classes = homeViewModel.todayClassesState.collectAsState()
     val showError = homeViewModel.shouldShowError.value
     val errorMessage = homeViewModel.errorMessage.value
     homeViewModel.shouldShowUser.observe(lifecycleOwner) {
+        email = it.email
+        nim = it.nim
         name = it.name
+        major = it.major
     }
 
     // error handler
@@ -73,8 +83,8 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
         ) {
             TextButton(
                 onClick = {
-                    /* TODO: Logout */
-                    navController.navigate(route = Screen.ClassDetails.passId(7))
+                    openDialog.value = true
+                    // navController.navigate(route = Screen.ClassDetails.passId(7))
                 },
             ) {
                 Text(text = "Halo, $name")
@@ -118,6 +128,34 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = hilt
             }
         }
 
+    }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = { openDialog.value = false },
+            title = { Text(text = "Profil Mahasiswa") },
+            text = {
+                Row() {
+                    Column() {
+                        Text(text = "Email ")
+                        Text(text = "NIM ")
+                        Text(text = "Nama ")
+                        Text(text = "Prodi ")
+                    }
+                    Column() {
+                        Text(text = ": $email")
+                        Text(text = ": $nim")
+                        Text(text = ": $name")
+                        Text(text = ": $major")
+                    }
+                }
+                   },
+            confirmButton = {
+                TextButton(onClick = { openDialog.value = false }) {
+                    Text(text = "KEMBALI")
+                }
+            }
+        )
     }
     
     BackHandler(enabled = true, onBack = {
