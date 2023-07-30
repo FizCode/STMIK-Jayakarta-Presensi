@@ -37,7 +37,9 @@ Pada kasus ini, maka penulis akan membuat sistem presensi yang hanya dapat dilak
 >- <a href='https://json2kt.com/'>Json2KT</a> <a>: Mengubah data API menjadi Data Class</a>
 
 ## Video Aplikasi
-soon
+https://github.com/FizCode/STMIK-Jayakarta-Presensi/assets/101188749/00288b51-b67c-4c9e-b943-36bfd4b63350
 
 ## Screenshots
-soon
+![Desktop - 1](https://github.com/FizCode/STMIK-Jayakarta-Presensi/assets/101188749/59720d1d-96f1-47de-af58-8a98b3d68426)
+![Desktop - 2](https://github.com/FizCode/STMIK-Jayakarta-Presensi/assets/101188749/45e2ced5-132a-482c-982b-75196f06abe4)
+
