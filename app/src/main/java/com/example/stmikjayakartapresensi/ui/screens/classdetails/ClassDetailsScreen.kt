@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.HourglassBottom
 import androidx.compose.material3.AlertDialog
@@ -49,8 +51,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -95,6 +99,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
     classDetailsViewModel.onViewLoaded(classesId = argsId)
     val classesDetails = classDetailsViewModel.classDetailState.collectAsState()
     val myPresenceStatus = classDetailsViewModel.myPresenceStatusState.collectAsState()
+    val isPresence = myPresenceStatus.value.presenceStatus
     val showError = classDetailsViewModel.shouldShowError.value
     val errorMessage = classDetailsViewModel.errorMessage.value
     classDetailsViewModel.shouldShowUser.observe(lifecycleOwner) {
@@ -197,6 +202,7 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         containerColor = MaterialTheme.colorScheme.surface,
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
+                // Table Column
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -268,6 +274,79 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                         }
                     }
                 }
+
+                // User Presence Status
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // TODO: My Presence Status
+                    val notPresence = isPresence.isEmpty()
+
+                    val startTimeString: String? = classesDetails.value.data.classStarted
+                    val endTimeString: String? = classesDetails.value.data.classEnded
+                    val inClassTime = isCurrentTimeInRange(startTimeString, endTimeString)
+                    val isBefore = isBefore(startTimeString)
+                    val isAfter = isAfter(endTimeString)
+
+                    var statusIcon  by remember { mutableStateOf(Icons.Rounded.HourglassBottom) }
+                    var iconColor by remember { mutableStateOf(Color.Black) }
+                    var statusTitle by remember { mutableStateOf("") }
+                    var statusDesc by remember { mutableStateOf("") }
+
+                    when {
+                        notPresence -> {
+                            if (!inClassTime) {
+                                if (isBefore) {
+                                    statusIcon = Icons.Rounded.HourglassBottom
+                                    iconColor = MaterialTheme.colorScheme.outline
+                                    statusTitle = "Belum Dimulai"
+                                    statusDesc = "Kamu belum hadir. Pergi ke kelas dan lakukan hadir."
+                                } else {
+                                    statusIcon = Icons.Rounded.Cancel
+                                    iconColor = MaterialTheme.colorScheme.error
+                                    statusTitle = "Kelas Terlewat"
+                                    statusDesc = "Kelas sudah selesai dan kamu tidak melakukan presensi kelas."
+                                }
+
+                            } else {
+                                statusIcon = Icons.Rounded.HourglassBottom
+                                iconColor = MaterialTheme.colorScheme.outline
+                                statusTitle = "Belum Hadir"
+                                statusDesc = "Lakukan kehadiran pada jam kelas."
+                            }
+                        }
+                        else -> {
+                            statusIcon = Icons.Rounded.CheckCircle
+                            iconColor = MaterialTheme.colorScheme.primary
+                            statusTitle = "Hadir"
+                            statusDesc = "Kamu sudah melakukan presensi."
+                        }
+                    }
+
+                    Icon(
+                        imageVector = statusIcon,
+                        contentDescription = "Status Icon",
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(100.dp),
+                        tint = iconColor
+                    )
+                    Text(
+                        text = statusTitle,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = iconColor
+                    )
+                    Text(
+                        text = statusDesc,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
 
             // Dialog
@@ -297,8 +376,6 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
 
-            val myPresence = myPresenceStatus.value.presenceStatus
-
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(p0: LocationResult) {
@@ -311,20 +388,9 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
 
             val startTimeString: String? = classesDetails.value.data.classStarted
             val endTimeString: String? = classesDetails.value.data.classEnded
+            val inClassTime = isCurrentTimeInRange(startTimeString, endTimeString)
 
-            fun isCurrentTimeInRange(): Boolean {
-                if (startTimeString == null || endTimeString == null) {
-                    return false
-                }
-
-                val startTime = LocalTime.parse(startTimeString)
-                val endTime = LocalTime.parse(endTimeString)
-                val currentTime = LocalTime.now()
-
-                return currentTime.isAfter(startTime) && currentTime.isBefore(endTime)
-            }
-
-            if (myPresence.isEmpty() && isCurrentTimeInRange()) {
+            if (isPresence.isEmpty() && inClassTime) {
                 ExtendedFloatingActionButton(
                     onClick = {
                         val permissions = arrayOf(
@@ -428,6 +494,37 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         }
         lifecycleOwner.lifecycle.addObserver(observer = observer)
     }
+}
+
+// Logic for class time in range
+private fun isCurrentTimeInRange(startTimeString: String?, endTimeString: String?): Boolean {
+    if (startTimeString == null || endTimeString == null) {
+        return false
+    }
+
+    val startTime = LocalTime.parse(startTimeString)
+    val endTime = LocalTime.parse(endTimeString)
+    val currentTime = LocalTime.now()
+
+    return currentTime.isAfter(startTime) && currentTime.isBefore(endTime)
+}
+
+private fun isBefore(startTimeString: String?): Boolean {
+    if (startTimeString == null) return false
+
+    val startTime = LocalTime.parse(startTimeString)
+    val currentTime = LocalTime.now()
+
+    return currentTime.isBefore(startTime)
+}
+
+private fun isAfter(endTimeString: String?): Boolean {
+    if (endTimeString == null) return false
+
+    val endTime = LocalTime.parse(endTimeString)
+    val currentTime = LocalTime.now()
+
+    return currentTime.isAfter(endTime)
 }
 
 // Get the user Location logic
