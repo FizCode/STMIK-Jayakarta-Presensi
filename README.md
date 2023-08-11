@@ -10,7 +10,7 @@ Sistem presensi Mahasiswa STMIK Jayakarta pada waktu skripsi ini dibuat masih me
 <br><br>
 Pada kasus kelas <i>offline</i>, waktu kelas akan terbuang untuk dosen melakuakan presensi mahasiswa. Kemudian pada kasus kelas <i>online</i>, mahasiswa yang tidak dapat hadir pada kelas akan tetap dapat melakukan presensi. Sehingga ini dapat menyebabkan kecurangan dilakukan oleh mahasiwa yang tidak hadir seolah mahasiswa tersebut hadir di kelas.
 <br><br>
-Jika kelas <i>offline</i> diterapkan sistem presensi seperti kelas <i>online</i>, akan ada kecurangan yaitu semua mahasiswa termasuk yang tidak hadir akan dianggap tidak hadir.
+Jika kelas <i>offline</i> diterapkan sistem presensi seperti kelas <i>online</i>, akan ada kecurangan yaitu semua mahasiswa termasuk yang tidak hadir mengisi form maka akan dianggap hadir.
 <br><br>
 Pada kasus ini, maka penulis akan membuat sistem presensi yang hanya dapat dilakukan di radius Jayakarta dengan konfirmasi <i>auth. biometric</i> dari ponsel masing - masing mahasiswa. Sehingga harapannya dapat memudahkan mahasiswa dalam melakukan presensi, mengurangi waktu presensi yang terbuang dan menghindari kecurangan mahasiswa dalam presensi.
 </p>

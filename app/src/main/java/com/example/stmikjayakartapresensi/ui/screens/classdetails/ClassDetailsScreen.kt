@@ -14,12 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,7 +31,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -202,78 +198,69 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
         containerColor = MaterialTheme.colorScheme.surface,
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                // Table Column
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(color = MaterialTheme.colorScheme.primaryContainer)
-                ) {
-
-                    // Table Head
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(color = MaterialTheme.colorScheme.primary),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Mahasiswa",
-                            modifier = Modifier.padding(8.dp),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    }
-
-                    // loading
-                    if (loading.value) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
-                    // Table Body
-                    LazyColumn {
-                        val itemSortedByName = classesDetails.value.data.classDetails.sortedBy { it.student?.name }
-                        itemsIndexed(
-                            items = itemSortedByName
-                        ) { _, item ->
-                            val presence = item.student?.presenceStatus
-                            Column(
-                                modifier = Modifier.background(
-                                    color = if (item.studentsId == userId) {
-                                        MaterialTheme.colorScheme.inversePrimary
-                                    }
-                                    else { MaterialTheme.colorScheme.primaryContainer }
-                                )
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp, horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    item.student?.name?.let {
-                                        Text(
-                                            text = it,
-                                            modifier = Modifier.weight(1f),
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-                                    if (presence!!.isNotEmpty()) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.CheckCircle,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            contentDescription = "Presence Status",
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Rounded.HourglassBottom,
-                                            tint = MaterialTheme.colorScheme.outline,
-                                            contentDescription = "Presence Status",
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+//                    // Table Head
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .background(color = MaterialTheme.colorScheme.primary),
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        Text(
+//                            text = "Mahasiswa",
+//                            modifier = Modifier.padding(8.dp),
+//                            style = MaterialTheme.typography.titleMedium,
+//                            color = MaterialTheme.colorScheme.onPrimary,
+//                        )
+//                    }
+//
+//                    // loading
+//                    if (loading.value) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+//
+//                    // Table Body
+//                    LazyColumn {
+//                        val itemSortedByName = classesDetails.value.data.classDetails.sortedBy { it.student?.name }
+//                        itemsIndexed(
+//                            items = itemSortedByName
+//                        ) { _, item ->
+//                            val presence = item.student?.presenceStatus
+//                            Column(
+//                                modifier = Modifier.background(
+//                                    color = if (item.studentsId == userId) {
+//                                        MaterialTheme.colorScheme.inversePrimary
+//                                    }
+//                                    else { MaterialTheme.colorScheme.primaryContainer }
+//                                )
+//                            ) {
+//                                Row(
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .padding(vertical = 8.dp, horizontal = 16.dp),
+//                                    verticalAlignment = Alignment.CenterVertically,
+//                                ) {
+//                                    item.student?.name?.let {
+//                                        Text(
+//                                            text = it,
+//                                            modifier = Modifier.weight(1f),
+//                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+//                                        )
+//                                    }
+//                                    if (presence!!.isNotEmpty()) {
+//                                        Icon(
+//                                            imageVector = Icons.Rounded.CheckCircle,
+//                                            tint = MaterialTheme.colorScheme.primary,
+//                                            contentDescription = "Presence Status",
+//                                        )
+//                                    } else {
+//                                        Icon(
+//                                            imageVector = Icons.Rounded.HourglassBottom,
+//                                            tint = MaterialTheme.colorScheme.outline,
+//                                            contentDescription = "Presence Status",
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
 
                 // User Presence Status
                 Column(
@@ -282,14 +269,12 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // TODO: My Presence Status
                     val notPresence = isPresence.isEmpty()
 
                     val startTimeString: String? = classesDetails.value.data.classStarted
                     val endTimeString: String? = classesDetails.value.data.classEnded
                     val inClassTime = isCurrentTimeInRange(startTimeString, endTimeString)
                     val isBefore = isBefore(startTimeString)
-                    val isAfter = isAfter(endTimeString)
 
                     var statusIcon  by remember { mutableStateOf(Icons.Rounded.HourglassBottom) }
                     var iconColor by remember { mutableStateOf(Color.Black) }
@@ -302,8 +287,8 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                                 if (isBefore) {
                                     statusIcon = Icons.Rounded.HourglassBottom
                                     iconColor = MaterialTheme.colorScheme.outline
-                                    statusTitle = "Belum Dimulai"
-                                    statusDesc = "Kamu belum hadir. Pergi ke kelas dan lakukan hadir."
+                                    statusTitle = "Belum Hadir"
+                                    statusDesc = "Lakukan kehadiran pada jam kelas."
                                 } else {
                                     statusIcon = Icons.Rounded.Cancel
                                     iconColor = MaterialTheme.colorScheme.error
@@ -314,8 +299,8 @@ fun ClassDetailsScreen(navController: NavController, argsId: Int, classDetailsVi
                             } else {
                                 statusIcon = Icons.Rounded.HourglassBottom
                                 iconColor = MaterialTheme.colorScheme.outline
-                                statusTitle = "Belum Hadir"
-                                statusDesc = "Lakukan kehadiran pada jam kelas."
+                                statusTitle = "Belum Dimulai"
+                                statusDesc = "Kamu belum hadir. Pergi ke kelas dan lakukan hadir."
                             }
                         }
                         else -> {
@@ -516,15 +501,6 @@ private fun isBefore(startTimeString: String?): Boolean {
     val currentTime = LocalTime.now()
 
     return currentTime.isBefore(startTime)
-}
-
-private fun isAfter(endTimeString: String?): Boolean {
-    if (endTimeString == null) return false
-
-    val endTime = LocalTime.parse(endTimeString)
-    val currentTime = LocalTime.now()
-
-    return currentTime.isAfter(endTime)
 }
 
 // Get the user Location logic
